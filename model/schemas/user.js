@@ -34,6 +34,11 @@ const userSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
+userSchema.path("email").validate((value) => {
+  const regEx = /\S+@\S+.\S+/gi;
+  return regEx.test(String(value));
+});
+
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(SALT_FACTOR);

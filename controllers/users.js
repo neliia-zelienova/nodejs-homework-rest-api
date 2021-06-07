@@ -5,13 +5,14 @@ const { HttpCode } = require("../helpers/constants");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const reg = async (req, res, next) => {
+  console.log("In reg function");
   try {
     const user = await Users.findByEmail(req.body.email);
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
         status: "error",
         code: HttpCode.CONFLICT,
-        message: "Email is already used!",
+        message: "Email in use",
       });
     }
     const newUser = await Users.create(req.body);
@@ -35,7 +36,7 @@ const login = async (req, res, next) => {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
-        message: "Invalid email or password",
+        message: "Email or password is wrong",
       });
     }
 
