@@ -5,7 +5,6 @@ const { HttpCode } = require("../helpers/constants");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const reg = async (req, res, next) => {
-  console.log("In reg function");
   try {
     const user = await Users.findByEmail(req.body.email);
     if (user) {
@@ -53,10 +52,79 @@ const login = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res, next) => {};
+const logout = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await Users.findById(userId);
+    console.log("logout", userId, user);
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Not authorized",
+      });
+    }
+
+    await Users.updateToken(user.id, null);
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const current = async (req, res, next) => {
+  const userId = req.user.id;
+  try {
+    const user = await Users.findById(userId);
+    if (user) {
+      const { subscription, email } = user;
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        data: { email, subscription },
+      });
+    } else {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Not authorized",
+      });
+    }
+  } catch (e) {
+    next(e);
+  }
+};
+
+const updSubscription = async (req, res, next) => {
+  const userId = req.user.id;
+  try {
+    const data = await Users.updateSubscription(userId, req.body.subscription);
+    if (data) {
+      const { subscription, email } = data;
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        data: { subscription, email },
+      });
+    } else {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Not authorized",
+      });
+    }
+  } catch (e) {
+    next(e);
+  }
+};
 
 module.exports = {
   reg,
   login,
   logout,
+  current,
+  updSubscription,
 };

@@ -6,6 +6,8 @@ const guard = require("../../../helpers/guard");
 
 router.get("/", guard, ctrl.getAll);
 
+router.get("/?", guard, ctrl.getFavorite);
+
 router.get("/:contactId", guard, ctrl.getById);
 
 router.post("/", guard, validateContact, ctrl.create);

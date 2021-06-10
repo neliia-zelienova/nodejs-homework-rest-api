@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { Subscription } = require("../../../helpers/constants");
 
 const emailPattern = /\S+@\S+.\S+/;
 
@@ -11,6 +12,12 @@ const schemaUser = Joi.object({
     })
     .required(),
   password: Joi.string().required(),
+});
+
+const schemaSubscription = Joi.object({
+  subscription: Joi.string()
+    .valid(...Object.values(Subscription))
+    .required(),
 });
 
 const validate = async (schema, body, next) => {
@@ -27,4 +34,8 @@ const validateUser = (req, _res, next) => {
   return validate(schemaUser, req.body, next);
 };
 
-module.exports = validateUser;
+const validateSubscription = (req, _res, next) => {
+  return validate(schemaSubscription, req.body, next);
+};
+
+module.exports = { validateUser, validateSubscription };

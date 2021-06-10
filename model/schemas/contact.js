@@ -18,6 +18,7 @@ const contactSchema = new Schema(
     favorite: {
       type: Boolean,
       default: false,
+      required: false,
     },
     owner: {
       type: SchemaTypes.ObjectId,

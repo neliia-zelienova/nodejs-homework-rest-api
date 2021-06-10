@@ -16,6 +16,7 @@ const guard = (req, res, next) => {
         message: "Not authorized",
       });
     }
+
     req.user = user;
     return next();
   })(req, res, next);

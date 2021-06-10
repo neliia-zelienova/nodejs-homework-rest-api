@@ -12,6 +12,7 @@ const schemaContact = Joi.object({
     })
     .required(),
   phone: Joi.string().pattern(phonePattern).required(),
+  favorite: Joi.boolean(),
 });
 
 const schemaFavoriteField = Joi.object({
