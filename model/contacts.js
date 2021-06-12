@@ -1,18 +1,19 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async () => {
-  const result = await Contact.find({});
+const listContacts = async (userID, query) => {
+  const result = await Contact.find({ owner: userID, ...query });
   return result;
 };
 
-const getContactById = async (contactId) => {
-  const result = await Contact.findOne({ _id: contactId });
+const getContactById = async (userID, contactId) => {
+  const result = await Contact.findOne({ _id: contactId, owner: userID });
   return result;
 };
 
-const removeContact = async (contactId) => {
+const removeContact = async (userID, contactId) => {
   const result = await Contact.findByIdAndRemove({
     _id: contactId,
+    owner: userID,
   });
   return result;
 };
@@ -22,10 +23,11 @@ const addContact = async (body) => {
   return result;
 };
 
-const updateContact = async (contactId, body) => {
+const updateContact = async (userID, contactId, body) => {
   const result = await Contact.findOneAndUpdate(
     {
       _id: contactId,
+      owner: userID,
     },
     { ...body },
     { new: true }
@@ -33,8 +35,7 @@ const updateContact = async (contactId, body) => {
   return result;
 };
 
-const updateStatusContact = async (contactId, body) => {
-  console.log("IN updateContact");
+const updateStatusContact = async (userID, contactId, body) => {
   const result = await Contact.findOneAndUpdate(
     {
       _id: contactId,
