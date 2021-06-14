@@ -21,8 +21,6 @@ const upload = multer({
       return;
     }
     cb(null, true);
-
-    // cb(new Error("I don't have a clue!"));
   },
 });
 

@@ -6,12 +6,12 @@ require("dotenv").config();
 const PORT = process.env.PORT || 3000;
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR;
-const USER_AVATARS = process.env.USER_AVATARS;
+const USERS_AVATARS = process.env.USERS_AVATARS;
 
 db.then(() => {
   app.listen(PORT, async () => {
     await createFolder(UPLOAD_DIR);
-    await createFolder(USER_AVATARS);
+    await createFolder(USERS_AVATARS);
     console.log("Database connection successful");
   });
 }).catch((err) => {

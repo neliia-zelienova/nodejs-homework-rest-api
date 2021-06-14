@@ -1,8 +1,10 @@
 const Users = require("../model/users");
 const jwt = require("jsonwebtoken");
+const UploadAvatar = require("../services/upload-avatars-local");
 require("dotenv").config();
 const { HttpCode } = require("../helpers/constants");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const USERS_AVATARS = process.env.USERS_AVATARS;
 
 const reg = async (req, res, next) => {
   try {
@@ -123,7 +125,20 @@ const updSubscription = async (req, res, next) => {
 
 const avatars = async (req, res, next) => {
   try {
-    return res.json({});
+    const id = req.user.id;
+    const uploads = new UploadAvatar(USERS_AVATARS);
+    const avatarUrl = await uploads.saveAvatarToStatic({
+      userId: id,
+      filePath: req.file.path,
+      name: req.file.filename,
+      oldFile: req.user.avatarURL,
+    });
+    await Users.updateAvatar(id, avatarUrl);
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { avatarUrl },
+    });
   } catch (e) {
     next(e);
   }
