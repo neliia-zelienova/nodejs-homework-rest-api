@@ -25,7 +25,6 @@ const reg = async (req, res, next) => {
         process.env.NODE_ENV,
         new CreateSenderNM()
       );
-
       await emailService.sendVerifyEmail(verifyToken, email);
     } catch (error) {
       console.log(error.message);
@@ -46,11 +45,18 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
     const isValidPassword = await user?.validPassword(password);
-    if (!user || !isValidPassword || !user.verify) {
+    if (!user || !isValidPassword) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
         message: "Email or password is wrong",
+      });
+    }
+    if (!user.verify) {
+      return res.status(HttpCode.BAD_REQUEST).json({
+        status: "error",
+        code: HttpCode.BAD_REQUEST,
+        message: "Verify your email!",
       });
     }
 
@@ -177,7 +183,34 @@ const verify = async (req, res, next) => {
     next(e);
   }
 };
-const repeatSendEmailVerify = async (req, res, next) => {};
+const repeatVerify = async (req, res, next) => {
+  const user = await Users.findByEmail(req.body.email);
+  if (user) {
+    const { email, verifyToken, verify } = user;
+    if (verify)
+      return res.status(HttpCode.BAD_REQUEST).json({
+        status: "error",
+        code: HttpCode.BAD_REQUEST,
+        message: "Verification has already been passed",
+      });
+    else {
+      try {
+        const emailService = new EmailService(
+          process.env.NODE_ENV,
+          new CreateSenderNM()
+        );
+        await emailService.sendVerifyEmail(verifyToken, email);
+      } catch (error) {
+        console.log(error.message);
+      }
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        message: "Verification email sent",
+      });
+    }
+  }
+};
 
 module.exports = {
   reg,
@@ -187,4 +220,5 @@ module.exports = {
   updSubscription,
   avatars,
   verify,
+  repeatVerify,
 };

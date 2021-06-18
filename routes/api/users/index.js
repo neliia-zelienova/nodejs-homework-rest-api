@@ -4,9 +4,14 @@ const ctrl = require("../../../controllers/users");
 const guard = require("../../../helpers/guard");
 const upload = require("../../../helpers/uploads");
 
-const { validateUser, validateSubscription } = require("./validation");
+const {
+  validateUser,
+  validateSubscription,
+  validateEmail,
+} = require("./validation");
 
 router.get("/verify/:verifyToken", ctrl.verify);
+router.post("/verify", validateEmail, ctrl.repeatVerify);
 router.post("/signup", validateUser, ctrl.reg);
 router.post("/login", validateUser, ctrl.login);
 router.post("/logout", guard, ctrl.logout);

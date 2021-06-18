@@ -20,6 +20,16 @@ const schemaSubscription = Joi.object({
     .required(),
 });
 
+const schemaRepeatedValidateUser = Joi.object({
+  email: Joi.string()
+    .regex(emailPattern)
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "uk", "ua"] },
+    })
+    .required(),
+});
+
 const validate = async (schema, body, next) => {
   console.log("In validate function");
   try {
@@ -38,4 +48,8 @@ const validateSubscription = (req, _res, next) => {
   return validate(schemaSubscription, req.body, next);
 };
 
-module.exports = { validateUser, validateSubscription };
+const validateEmail = (req, _res, next) => {
+  return validate(schemaRepeatedValidateUser, req.body, next);
+};
+
+module.exports = { validateUser, validateSubscription, validateEmail };
