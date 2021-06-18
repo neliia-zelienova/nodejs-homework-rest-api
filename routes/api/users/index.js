@@ -6,6 +6,7 @@ const upload = require("../../../helpers/uploads");
 
 const { validateUser, validateSubscription } = require("./validation");
 
+router.get("/verify/:verifyToken", ctrl.verify);
 router.post("/signup", validateUser, ctrl.reg);
 router.post("/login", validateUser, ctrl.login);
 router.post("/logout", guard, ctrl.logout);

@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const UploadAvatar = require("../services/upload-avatars-local");
 require("dotenv").config();
 const { HttpCode } = require("../helpers/constants");
+const EmailService = require("../services/email");
+const { CreateSenderNM } = require("../services/email-sender");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const USERS_AVATARS = process.env.USERS_AVATARS;
 
@@ -17,7 +19,18 @@ const reg = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
-    const { id, email, subscription, avatarURL } = newUser;
+    const { id, email, subscription, avatarURL, verifyToken } = newUser;
+    try {
+      const emailService = new EmailService(
+        process.env.NODE_ENV,
+        new CreateSenderNM()
+      );
+
+      await emailService.sendVerifyEmail(verifyToken, email);
+    } catch (error) {
+      console.log(error.message);
+    }
+
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
@@ -33,7 +46,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
     const isValidPassword = await user?.validPassword(password);
-    if (!user || !isValidPassword) {
+    if (!user || !isValidPassword || !user.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
@@ -58,7 +71,6 @@ const logout = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await Users.findById(userId);
-    console.log("logout", userId, user);
     if (!user) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
@@ -144,6 +156,29 @@ const avatars = async (req, res, next) => {
   }
 };
 
+const verify = async (req, res, next) => {
+  try {
+    const user = await Users.findByVerifyToken(req.params.verifyToken);
+    if (user) {
+      await Users.updateVefiryToken(user._id, null, true);
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        message: "Verification successful",
+      });
+    } else {
+      return res.status(HttpCode.NOT_FOUND).json({
+        status: "error",
+        code: HttpCode.NOT_FOUND,
+        message: "User not found",
+      });
+    }
+  } catch (e) {
+    next(e);
+  }
+};
+const repeatSendEmailVerify = async (req, res, next) => {};
+
 module.exports = {
   reg,
   login,
@@ -151,4 +186,5 @@ module.exports = {
   current,
   updSubscription,
   avatars,
+  verify,
 };

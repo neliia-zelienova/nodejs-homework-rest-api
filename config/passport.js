@@ -16,9 +16,10 @@ passport.use(
       if (!user) {
         return done(new Error("User not found"), false);
       }
-      if (!user.token) {
+      if (!user.token || !user.verify) {
         return done(null, false);
       }
+
       return done(null, user);
     } catch (error) {
       return done(error, false);
