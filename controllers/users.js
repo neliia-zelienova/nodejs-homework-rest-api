@@ -209,7 +209,12 @@ const repeatVerify = async (req, res, next) => {
         message: "Verification email sent",
       });
     }
-  }
+  } else
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      message: "User not found",
+    });
 };
 
 module.exports = {

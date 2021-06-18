@@ -31,7 +31,6 @@ const schemaRepeatedValidateUser = Joi.object({
 });
 
 const validate = async (schema, body, next) => {
-  console.log("In validate function");
   try {
     await schema.validateAsync(body);
     next();
